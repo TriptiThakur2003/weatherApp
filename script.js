@@ -426,7 +426,7 @@ unitF.addEventListener("click", () => {
 })();
 
      
-// 9. `fix: input validation and custom error popup handling`  
+// 9. `fix: `  
 // 10. `feat: add temperature unit toggle for today's temperature`  
 // 11. `style: improve responsive layout for iPad and iPhone SE`  
 // 12. `docs: add README and assignment mapping notes`

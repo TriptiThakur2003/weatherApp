@@ -387,7 +387,4 @@ unitF.addEventListener("click", () => {
   loadRecents();
   showMessage("Ready — search a city or use Locate", "persistent");
 })();
-
-
-// 11. `style: `  
-// 12. `docs: add README and assignment mapping notes`
+ 

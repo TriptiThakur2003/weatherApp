@@ -1,3 +1,4 @@
+
 const OPENWEATHER_KEY = "ba6c652688fca7d73e66956a0c93ba90"; // <-- set your API key
 
 // endpoints
@@ -13,7 +14,13 @@ const recentDropdown = document.getElementById("recentDropdown");
 const recentHint = document.getElementById("recentHint");
 const msgBox = document.getElementById("msgBox");
 const errorPopup = document.getElementById("errorPopup");
- 
+
+const weatherPanel = document.getElementById("weatherPanel");
+const placeName = document.getElementById("placeName");
+const localTime = document.getElementById("localTime");
+const todayTemp = document.getElementById("todayTemp");
+const weatherCondition = document.getElementById("weatherCondition");
+const iconBox = document.getElementById("iconBox");
 
 const statHumidity = document.getElementById("statHumidity");
 const statWind = document.getElementById("statWind");
@@ -262,103 +269,6 @@ function summarizeForecast(forecast) {
   return result;
 }
 
-function showErrorPopup(text) {
-  errorPopup.textContent = text;
-  errorPopup.classList.remove("hidden");
-  setTimeout(() => errorPopup.classList.add("hidden"), 4500);
-}
-
-function saveRecents() {
-  localStorage.setItem(
-    "glasscast_recent",
-    JSON.stringify(recentCities.slice(0, 6))
-  );
-  renderRecents();
-}
-function loadRecents() {
-  try {
-    recentCities = JSON.parse(localStorage.getItem("glasscast_recent") || "[]");
-  } catch (e) {
-    recentCities = [];
-  }
-  renderRecents();
-}
-function addRecent(cityName) {
-  if (!cityName) return;
-  cityName = cityName.trim();
-  recentCities = recentCities.filter(
-    (c) => c.toLowerCase() !== cityName.toLowerCase()
-  );
-  recentCities.unshift(cityName);
-  if (recentCities.length > 6) recentCities.length = 6;
-  saveRecents();
-}
-function renderRecents() {
-  if (!recentCities || recentCities.length === 0) {
-    recentDropdown.classList.add("hidden");
-    recentHint.classList.remove("hidden");
-    recentDropdown.innerHTML = "";
-    return;
-  }
-  recentDropdown.classList.remove("hidden");
-  recentHint.classList.add("hidden");
-  recentDropdown.innerHTML = "";
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-  placeholder.textContent = "Select recent...";
-  recentDropdown.appendChild(placeholder);
-  for (const c of recentCities) {
-    const op = document.createElement("option");
-    op.value = c;
-    op.textContent = c;
-    recentDropdown.appendChild(op);
-  }
-}
-
-// fetch wrapper with error handling
-async function fetchJson(url) {
-  const res = await fetch(url);
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`HTTP ${res.status} - ${txt}`);
-  }
-  return res.json();
-}   
-
-
-// events
-btnSearch.addEventListener("click", () => doSearch(inputCity.value));
-inputCity.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    doSearch(inputCity.value);
-  }
-});
-btnLocate.addEventListener("click", doLocate);
-recentDropdown.addEventListener("change", () => {
-  const v = recentDropdown.value;
-  if (v) doSearch(v);
-});
-toggleFc.addEventListener("click", () => {
-  forecastList.classList.toggle("hidden");
-});
-
-// unit toggles
-unitC.addEventListener("click", () => {
-  showUnit = "C";
-  unitC.classList.add("bg-white/6");
-  unitF.classList.remove("bg-white/6");
-  if (lastCurrentData) renderCurrent(lastCurrentData);
-  if (lastForecastData) renderForecast(lastForecastData);
-});
-unitF.addEventListener("click", () => {
-  showUnit = "F";
-  unitF.classList.add("bg-white/6");
-  unitC.classList.remove("bg-white/6");
-  if (lastCurrentData) renderCurrent(lastCurrentData);
-  if (lastForecastData) renderForecast(lastForecastData);
-});
-
 function renderForecast(forecast) {
   lastForecastData = forecast;
   const days = summarizeForecast(forecast);
@@ -385,7 +295,60 @@ function renderForecast(forecast) {
     `;
     forecastList.appendChild(card);
   }
-} 
+}
+
+//  user flows
+async function doSearch(query) {
+  if (!query || !query.trim()) {
+    showMessage("Please enter a city name", "error");
+    return;
+  }
+  showMessage("Fetching weather...");
+  try {
+    const { current, forecast } = await fetchWeatherByCity(query.trim());
+    renderCurrent(current);
+    renderForecast(forecast);
+    addRecent(`${current.name}, ${current.sys?.country || ""}`);
+    showMessage("Updated");
+    forecastList.classList.remove("hidden");
+  } catch (err) {
+    console.error(err);
+    showMessage("Failed to fetch. Check city name or API key", "error");
+  }
+}
+
+function doLocate() {
+  if (!navigator.geolocation) {
+    showMessage("Geolocation not supported", "error");
+    return;
+  }
+  showMessage("Getting your location...");
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords;
+        showMessage("Fetching weather for your location...");
+        const { current, forecast } = await fetchWeatherByCoords(
+          latitude,
+          longitude
+        );
+        renderCurrent(current);
+        renderForecast(forecast);
+        addRecent(`${current.name}, ${current.sys?.country || ""}`);
+        showMessage("Location weather loaded");
+        forecastList.classList.remove("hidden");
+      } catch (err) {
+        console.error(err);
+        showMessage("Could not fetch location weather", "error");
+      }
+    },
+    () => {
+      showMessage("Location permission denied", "error");
+    },
+    { timeout: 10000 }
+  );
+}
+
 // events
 btnSearch.addEventListener("click", () => doSearch(inputCity.value));
 inputCity.addEventListener("keypress", (e) => {
@@ -424,6 +387,7 @@ unitF.addEventListener("click", () => {
   loadRecents();
   showMessage("Ready — search a city or use Locate", "persistent");
 })();
- 
-// 11. `style: improve responsive layout for iPad and iPhone SE`  
+
+
+// 11. `style: `  
 // 12. `docs: add README and assignment mapping notes`

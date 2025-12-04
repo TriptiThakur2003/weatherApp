@@ -385,60 +385,7 @@ function renderForecast(forecast) {
     `;
     forecastList.appendChild(card);
   }
-}
-
-//  user flows
-async function doSearch(query) {
-  if (!query || !query.trim()) {
-    showMessage("Please enter a city name", "error");
-    return;
-  }
-  showMessage("Fetching weather...");
-  try {
-    const { current, forecast } = await fetchWeatherByCity(query.trim());
-    renderCurrent(current);
-    renderForecast(forecast);
-    addRecent(`${current.name}, ${current.sys?.country || ""}`);
-    showMessage("Updated");
-    forecastList.classList.remove("hidden");
-  } catch (err) {
-    console.error(err);
-    showMessage("Failed to fetch. Check city name or API key", "error");
-  }
-}
-
-function doLocate() {
-  if (!navigator.geolocation) {
-    showMessage("Geolocation not supported", "error");
-    return;
-  }
-  showMessage("Getting your location...");
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      try {
-        const { latitude, longitude } = pos.coords;
-        showMessage("Fetching weather for your location...");
-        const { current, forecast } = await fetchWeatherByCoords(
-          latitude,
-          longitude
-        );
-        renderCurrent(current);
-        renderForecast(forecast);
-        addRecent(`${current.name}, ${current.sys?.country || ""}`);
-        showMessage("Location weather loaded");
-        forecastList.classList.remove("hidden");
-      } catch (err) {
-        console.error(err);
-        showMessage("Could not fetch location weather", "error");
-      }
-    },
-    () => {
-      showMessage("Location permission denied", "error");
-    },
-    { timeout: 10000 }
-  );
-}
-
+} 
 // events
 btnSearch.addEventListener("click", () => doSearch(inputCity.value));
 inputCity.addEventListener("keypress", (e) => {

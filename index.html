@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Tripti — Weather Forecast</title>
+
+    <!-- Tailwind Play CDN (quick) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Local stylesheet for glass and animations -->
+    <link rel="stylesheet" href="style.css" />
+
+    <link rel="shortcut icon" href="./assets/favicon.png" type="image/x-icon" />
+  </head>
+  <body
+    class="bg-gradient-to-b from-[#04111a] via-[#071827] to-[#031018] min-h-screen text-slate-100 font-inter"
+  >
+    <div id="root" class="max-w-6xl mx-auto p-6">
+      <header class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#7ee7ff] to-[#a78bfa] flex items-center justify-center text-slate-900 font-extrabold shadow-lg text-3xl"
+          >
+            T
+          </div>
+          <div>
+            <h1 class="text-xl md:text-2xl font-semibold text-[#7ee7ff]">
+              Tripti
+            </h1>
+            <p class="text-xs text-slate-300">
+              Animated forecasts · JavaScript
+            </p>
+          </div>
+        </div>
+
+        <div class="hidden sm:block text-sm text-slate-400">
+          Built with HTML • Tailwind CSS • Vanilla JS
+        </div>
+      </header>
+
+      <main class="grid grid-cols-1 lg:grid-cols-3 gap-6 mainGrid items-center">
+        <!-- LEFT: Controls -->
+        <aside class="lg:col-span-1 glass-card p-5">
+          <form id="searchForm" class="space-y-4">
+            <div>
+              <label class="text-sm text-slate-300">Search City</label>
+              <input
+                id="inputCity"
+                type="text"
+                placeholder="e.g., New Delhi"
+                class="mt-2 w-full rounded-lg bg-transparent border border-white/10 px-3 py-2 outline-none placeholder:text-slate-400"
+              />
+            </div>
+
+            <div id="msgBox" class="text-sm text-slate-300"></div>
+            <div class="flex gap-3">
+              <button
+                id="btnSearch"
+                type="button"
+                class="flex-1 py-2 rounded-lg bg-gradient-to-r from-[#7ee7ff] to-[#a78bfa] text-slate-900 font-semibold"
+              >
+                Search
+              </button>
+              <button
+                id="btnLocate"
+                type="button"
+                class="px-4 py-2 rounded-lg border border-white/10"
+              >
+                Use Location
+              </button>
+            </div>
+
+            <div>
+              <label class="text-sm text-slate-300">Recent Searches</label>
+              <select
+                id="recentDropdown"
+                class="mt-2 w-full rounded-lg bg-transparent border border-white/10 px-3 py-2 text-slate-100 hidden"
+              >
+                <!-- populated dynamically -->
+              </select>
+              <p id="recentHint" class="text-xs text-slate-400 mt-2">
+                No recent searches yet
+              </p>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div>
+                <label class="text-sm text-slate-300">Today Unit</label>
+                <div
+                  class="mt-2 inline-flex rounded-md overflow-hidden border border-white/10"
+                >
+                  <button id="unitC" type="button" class="px-3 py-1 bg-white/6">
+                    °C
+                  </button>
+                  <button id="unitF" type="button" class="px-3 py-1">°F</button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <div
+            id="errorPopup"
+            class="mt-4 hidden p-3 rounded-lg bg-red-600/20 text-red-200"
+          ></div>
+        </aside>
+
+        <!-- MIDDLE + RIGHT: Display -->
+        <section
+          id="weatherPanel"
+          class="lg:col-span-2 glass-card p-6 hidden py-10"
+        >
+          <div class="block md:flex md:items-start md:justify-between">
+            <div>
+              <h2 id="placeName" class="text-2xl font-semibold text-[#7ee7ff]">
+                —
+              </h2>
+              <p id="localTime" class="text-xs text-slate-400 mt-1">—</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="text-right">
+                <div id="todayTemp" class="text-5xl font-bold leading-none">
+                  --°
+                </div>
+                <div
+                  id="weatherCondition"
+                  class="text-sm text-slate-300 mt-1 capitalize"
+                >
+                  —
+                </div>
+              </div>
+              <div
+                id="iconBox"
+                class="w-40 h-28 rounded-xl overflow-hidden flex items-center justify-center relative"
+              >
+                <!-- animated icons inserted here -->
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="stat p-3 rounded-lg bg-white/3">
+              <div class="text-xs text-slate-300">Humidity</div>
+              <div id="statHumidity" class="font-semibold mt-1">— %</div>
+            </div>
+
+            <div class="stat p-3 rounded-lg bg-white/3">
+              <div class="text-xs text-slate-300">Wind</div>
+              <div id="statWind" class="font-semibold mt-1">— m/s</div>
+            </div>
+
+            <div class="stat p-3 rounded-lg bg-white/3">
+              <div class="text-xs text-slate-300">Pressure</div>
+              <div id="statPressure" class="font-semibold mt-1">— hPa</div>
+            </div>
+
+            <div class="stat p-3 rounded-lg bg-white/3">
+              <div class="text-xs text-slate-300">Visibility</div>
+              <div id="statVisibility" class="font-semibold mt-1">— m</div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex items-center justify-between">
+            <h3 class="text-sm text-[#a78bfa] font-medium">5-Day Forecast</h3>
+            <button
+              id="toggleFc"
+              class="text-xs px-3 py-1 rounded-md border border-white/10"
+            >
+              Show / Hide
+            </button>
+          </div>
+
+          <div
+            id="forecastList"
+            class="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 hidden"
+          >
+            <!-- forecast cards -->
+          </div>
+        </section>
+      </main>
+
+      <footer class="mt-8 text-center text-xs text-slate-400">
+        © Tripti • Weather data via OpenWeatherMap API
+      </footer>
+    </div>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>

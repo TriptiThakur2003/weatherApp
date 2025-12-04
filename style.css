@@ -1,0 +1,135 @@
+/* base */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --accent: #7ee7ff;
+  --accent2: #a78bfa;
+  --muted: #9fb3c3;
+  --card-radius: 14px;
+}
+
+.mainGrid {
+  min-height: 77vh;
+}
+
+.glass-card {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.02),
+    rgba(255, 255, 255, 0.01)
+  );
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px) saturate(110%);
+  border-radius: var(--card-radius);
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+  color: #e8f2fb;
+}
+
+/* icon area */
+#iconBox img {
+  width: 84px;
+  height: 84px;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.5));
+}
+
+#iconBox .anim-sun {
+  animation: spin 16s linear infinite;
+  transform-origin: center;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* rain drops & snow */
+.drop {
+  position: absolute;
+  width: 3px;
+  height: 14px;
+  border-radius: 3px;
+  background: linear-gradient(#6fbfff, #57a0d9);
+  animation: fall 0.9s linear infinite;
+}
+.snowflake {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.9;
+  animation: fall 1.6s linear infinite;
+}
+@keyframes fall {
+  0% {
+    transform: translateY(-20%);
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(140%);
+    opacity: 0;
+  }
+}
+
+/* weather moods (toggle body classes via JS) */
+.bg-sunny {
+  background: radial-gradient(
+      800px 320px at 10% 15%,
+      rgba(255, 214, 95, 0.06),
+      transparent
+    ),
+    linear-gradient(180deg, #052233, #021018) !important;
+}
+.bg-cloudy {
+  background: radial-gradient(
+      600px 260px at 80% 10%,
+      rgba(255, 255, 255, 0.03),
+      transparent
+    ),
+    linear-gradient(180deg, #081a27, #031018) !important;
+}
+.bg-rainy {
+  background: radial-gradient(
+      700px 300px at 50% 10%,
+      rgba(120, 180, 255, 0.03),
+      transparent
+    ),
+    linear-gradient(180deg, #041226, #021014) !important;
+}
+.bg-snow {
+  background: radial-gradient(
+      700px 300px at 50% 10%,
+      rgba(230, 240, 255, 0.03),
+      transparent
+    ),
+    linear-gradient(180deg, #081a27, #041018) !important;
+}
+
+/* forecast card */
+.fc-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
+  padding: 12px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+/* small responsive for iPhone SE (320px wide) */
+@media (max-width: 360px) {
+  #iconBox {
+    width: 86px;
+    height: 86px;
+  }
+  .text-5xl {
+    font-size: 2.2rem;
+  }
+}
+
+#recentDropdown option {
+  color: #021014;
+}

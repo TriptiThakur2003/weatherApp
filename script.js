@@ -359,6 +359,119 @@ unitF.addEventListener("click", () => {
   if (lastForecastData) renderForecast(lastForecastData);
 });
 
+function renderForecast(forecast) {
+  lastForecastData = forecast;
+  const days = summarizeForecast(forecast);
+  forecastList.innerHTML = "";
+  for (const d of days) {
+    const card = document.createElement("div");
+    card.className = "fc-card glass-card";
+    const dt = new Date(d.date);
+    card.innerHTML = `
+      <div class="text-xs text-slate-300">${dt.toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      })}</div>
+      <img src="${W_ICON}/${d.icon}.png" alt="${
+      d.desc
+    }" class="mx-auto my-2" width="64" height="64" loading="lazy" />
+      <div class="text-lg font-bold">${
+        showUnit === "C" ? `${Math.round(d.avgTemp)}°C` : `${toF(d.avgTemp)}°F`
+      }</div>
+      <div class="text-xs text-slate-400 mt-1">💨 ${d.avgWind.toFixed(
+        1
+      )} m/s · 💧 ${Math.round(d.avgHum)}%</div>
+    `;
+    forecastList.appendChild(card);
+  }
+}
+
+//  user flows
+async function doSearch(query) {
+  if (!query || !query.trim()) {
+    showMessage("Please enter a city name", "error");
+    return;
+  }
+  showMessage("Fetching weather...");
+  try {
+    const { current, forecast } = await fetchWeatherByCity(query.trim());
+    renderCurrent(current);
+    renderForecast(forecast);
+    addRecent(`${current.name}, ${current.sys?.country || ""}`);
+    showMessage("Updated");
+    forecastList.classList.remove("hidden");
+  } catch (err) {
+    console.error(err);
+    showMessage("Failed to fetch. Check city name or API key", "error");
+  }
+}
+
+function doLocate() {
+  if (!navigator.geolocation) {
+    showMessage("Geolocation not supported", "error");
+    return;
+  }
+  showMessage("Getting your location...");
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords;
+        showMessage("Fetching weather for your location...");
+        const { current, forecast } = await fetchWeatherByCoords(
+          latitude,
+          longitude
+        );
+        renderCurrent(current);
+        renderForecast(forecast);
+        addRecent(`${current.name}, ${current.sys?.country || ""}`);
+        showMessage("Location weather loaded");
+        forecastList.classList.remove("hidden");
+      } catch (err) {
+        console.error(err);
+        showMessage("Could not fetch location weather", "error");
+      }
+    },
+    () => {
+      showMessage("Location permission denied", "error");
+    },
+    { timeout: 10000 }
+  );
+}
+
+// events
+btnSearch.addEventListener("click", () => doSearch(inputCity.value));
+inputCity.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    doSearch(inputCity.value);
+  }
+});
+btnLocate.addEventListener("click", doLocate);
+recentDropdown.addEventListener("change", () => {
+  const v = recentDropdown.value;
+  if (v) doSearch(v);
+});
+toggleFc.addEventListener("click", () => {
+  forecastList.classList.toggle("hidden");
+});
+
+// unit toggles
+unitC.addEventListener("click", () => {
+  showUnit = "C";
+  unitC.classList.add("bg-white/6");
+  unitF.classList.remove("bg-white/6");
+  if (lastCurrentData) renderCurrent(lastCurrentData);
+  if (lastForecastData) renderForecast(lastForecastData);
+});
+unitF.addEventListener("click", () => {
+  showUnit = "F";
+  unitF.classList.add("bg-white/6");
+  unitC.classList.remove("bg-white/6");
+  if (lastCurrentData) renderCurrent(lastCurrentData);
+  if (lastForecastData) renderForecast(lastForecastData);
+});
+
 //  init
 (function init() {
   loadRecents();
